@@ -1,0 +1,131 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Georgia, serif;
+  line-height: 1.6;
+  background-color: #fff8e7;
+  color: #333;
+}
+
+/* Header */
+header {
+  background: #fff8e7;
+  color: #a36b00;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 50px;
+}
+
+header .logo {
+  font-weight: bold;
+  font-size: 1.4rem;
+  color: #a36b00;
+}
+
+header nav ul {
+  display: flex;
+  list-style: none;
+}
+
+header nav ul li {
+  margin-left: 25px;
+}
+
+header nav ul li a {
+  text-decoration: none;
+  color: #a36b00;
+  font-weight: 500;
+}
+
+header nav ul li a.active,
+header nav ul li a:hover {
+  border-bottom: 2px solid #a36b00;
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  background: url("tomatoes.jpg") no-repeat center center/cover;
+  height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero .overlay {
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff3cd;
+  text-align: center;
+  padding: 40px;
+  border-radius: 10px;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  color: #ffb300;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+.hero .btn {
+  display: inline-block;
+  background: #2e8b57;
+  color: #fff;
+  padding: 12px 25px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.hero .btn:hover {
+  background: #256d47;
+}
+
+/* Footer */
+footer {
+  background: #d4a937;
+  padding: 30px 50px;
+  color: #fff;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.footer-box {
+  flex: 1;
+  margin: 10px 20px;
+}
+
+.footer-box h2,
+.footer-box h3 {
+  margin-bottom: 15px;
+}
+
+.footer-box ul {
+  list-style: none;
+}
+
+.footer-box ul li {
+  margin-bottom: 10px;
+}
+
+.footer-box ul li a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.footer-box ul li a:hover {
+  text-decoration: none;
+}
