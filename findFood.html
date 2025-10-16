@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Find Food Banks – Mass Food Finder</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Leaflet (interactive map) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+    defer
+  ></script>
+
+  <style>
+    :root{
+      --bg-1:#e1d4b6; --bg-2:#c5b18b;
+      --sage-100:#e3e9cf; --cream:#f7f5eb;
+      --text:#2a2a22; --accent:#2f6f4f;
+      --orange:#a56618; --btn:#2f7a39; --btn2:#25632e;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; color:var(--text); font-family:"Lora",serif;
+      background:
+        radial-gradient(1400px 600px at 15% 70%, rgba(0,0,0,.06), transparent 60%),
+        radial-gradient(1000px 450px at 85% 30%, rgba(0,0,0,.05), transparent 60%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    }
+    a{color:#2b1400}
+    .wrap{width:min(1100px,92%); margin:auto}
+    /* header */
+    .site-header{background:rgba(255,255,255,.55); border-bottom:1px solid #e7e5dc; backdrop-filter:saturate(140%) blur(2px)}
+    .nav-row{display:flex; align-items:center; justify-content:space-between; padding:14px 0}
+    .brand{font-family:"Playfair Display",serif; font-weight:700; color:#d97706; font-size:1.35rem}
+    .nav a{margin-left:24px; color:#a8783f; text-decoration:none}
+    .nav a.active{color:#a05f1a; text-decoration:underline}
+
+    /* hero */
+    .hero{padding:34px 0 12px}
+    .hero h1{
+      font-family:"Playfair Display",serif; text-align:center; color:var(--accent);
+      font-size:clamp(2rem,2.2rem + 2vw,3rem); line-height:1.15; margin:0 0 10px;
+    }
+
+    /* layout */
+    .grid{display:grid; grid-template-columns:280px minmax(0,1fr) 300px; gap:26px; align-items:start; padding-bottom:36px}
+    .round-photo{
+      width:260px; aspect-ratio:1; border-radius:50%; object-fit:cover;
+      border:2px solid rgba(255,255,255,.55); box-shadow:0 6px 20px rgba(0,0,0,.12); display:block; margin:0 auto 20px;
+    }
+    .quote{font-family:"Playfair Display",serif; color:var(--orange); font-size:clamp(1.6rem,1.2rem + 1.4vw,2.1rem); text-align:center}
+    .panel{
+      background:rgba(255,255,255,.35); padding:16px; border-radius:14px;
+      box-shadow:0 6px 24px rgba(0,0,0,.08); backdrop-filter:blur(2px) saturate(120%);
+    }
+    /* search/list panel */
+    .search h2{font-family:"Playfair Display",serif; margin:0 0 10px}
+    .search input{
+      width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid #e4dfcf; background:var(--cream); margin-bottom:10px; font-size:1rem;
+    }
+    .list{max-height:360px; overflow:auto; margin:0; padding:0; list-style:none}
+    .list li{padding:10px 6px; border-bottom:1px dashed #decfb1}
+    .list li button{background:none; border:none; color:#1a4d35; cursor:pointer; font:inherit; text-align:left; padding:0}
+    .list small{display:block; color:#6e6149}
+
+    /* map */
+    #map{width:100%; height:520px; border-radius:10px; overflow:hidden}
+    .map-wrap{display:flex; flex-direction:column; gap:12px}
+    .actions{display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+    .btn{
+      background:var(--btn); color:#fff; padding:12px 18px; border:none; border-radius:999px;
+      text-decoration:none; font-weight:700; letter-spacing:.4px; cursor:pointer;
+    }
+    .btn.secondary{background:#4a7852}
+    .btn:hover{background:var(--btn2)}
+    .pill{background:var(--sage-100); padding:6px 10px; border-radius:999px; font-size:.9rem}
+
+    /* footer */
+    .site-footer{background:#ea9d2b; color:#2d1f07; padding:26px 0 34px}
+    .footer-grid{display:grid; grid-template-columns:2fr 1fr 1fr; gap:24px}
+    .foot-title{font-family:"Playfair Display",serif; font-weight:700; font-size:1.8rem}
+
+    @media (max-width:980px){
+      .grid{grid-template-columns:1fr; gap:18px}
+      .round-photo{width:220px}
+      #map{height:420px}
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">Western Mass Food Banks</div>
+    <nav>
+      <ul>
+        <li><a href="/index.html">Home</a></li>
+        <li><a href="/findFood.html" class="active">Find Food Banks</a></li>
+        <li><a href="/about.html">About</a></li>
+        <li><a href="/contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main -->
+  <main>
+    <section class="wrap hero">
+      <h1>Locate the Nearest Food Bank<br>Near You</h1>
+
+      <div class="grid">
+        <!-- Left image + facts -->
+        <aside>
+          <img class="round-photo" src="https://images.unsplash.com/photo-1532634896-26909d0d4b6a?q=80&w=1200&auto=format&fit=crop" alt="Volunteers preparing food">
+          <div class="panel" style="text-align:center;">
+            <div class="pill">Western Massachusetts</div>
+            <p style="margin:.6rem 0 0;">Browse locations or use your current position.</p>
+          </div>
+        </aside>
+
+        <!-- Map -->
+        <section class="map-wrap">
+          <div id="map" aria-label="Interactive map of food banks"></div>
+          <div class="actions">
+            <button id="locateBtn" class="btn" type="button">Use My Location</button>
+            <a id="directionsLink" class="btn secondary" href="#" target="_blank" rel="noopener">Directions</a>
+          </div>
+        </section>
+
+        <!-- Right search/list -->
+        <aside class="panel search">
+          <h2>Food Banks Nearby</h2>
+          <input id="search" type="search" placeholder="Search by city or name…" aria-label="Search locations">
+          <ul id="results" class="list" aria-live="polite"></ul>
+          <p class="quote">“No Need to be<br>Hungry”</p>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div>
+        <div class="foot-title">Mass Food Finder</div>
+        <p>Connecting communities with food assistance resources</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#">Find Food Banks</a></li>
+          <li><a href="#">About Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact Me</h4>
+        <ul>
+          <li>Email: <span style="border-bottom:2px solid #2b1400;">—————</span></li>
+          <li>Phone Number: <span style="border-bottom:2px solid #2b1400;">————</span></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Page logic -->
+  <script>
+    // Sample food bank locations (Western MA area)
+    const locations = [
+      { id: 1, name: "Food Bank of Western Massachusetts", city: "Hatfield", lat: 42.3699, lng: -72.6050, addr: "97 N Hatfield Rd, Hatfield, MA" },
+      { id: 2, name: "Open Pantry Community Services", city: "Springfield", lat: 42.1037, lng: -72.5898, addr: "2460 Main St, Springfield, MA" },
+      { id: 3, name: "The Amherst Survival Center", city: "Amherst", lat: 42.3954, lng: -72.5320, addr: "138 Sunderland Rd, Amherst, MA" },
+      { id: 4, name: "Northampton Survival Center", city: "Northampton", lat: 42.3173, lng: -72.6311, addr: "265 Prospect St, Northampton, MA" },
+      { id: 5, name: "Hilltown Pantry", city: "Goshen", lat: 42.4440, lng: -72.7890, addr: "1 Plainfield Rd, Goshen, MA" }
+    ];
+
+    // Initialize map
+    let selected = null;
+    const map = L.map('map', { scrollWheelZoom: true }).setView([42.34, -72.65], 9);
+
+    // Tile layer (attribution included)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors'
+    }).addTo(map);
+
+    // Create markers
+    const markers = {};
+    locations.forEach(loc => {
+      const m = L.marker([loc.lat, loc.lng]).addTo(map);
+      m.bindPopup(`<strong>${loc.name}</strong><br>${loc.addr}<br><small>${loc.city}</small>`);
+      m.on('click', () => selectLocation(loc));
+      markers[loc.id] = m;
+    });
+
+    // Populate list
+    const listEl = document.getElementById('results');
+    function renderList(items){
+      listEl.innerHTML = items.map(l =>
+        `<li>
+          <button data-id="${l.id}" aria-label="Focus ${l.name}">
+            <strong>${l.name}</strong>
+            <small>${l.city} • ${l.addr}</small>
+          </button>
+        </li>`
+      ).join('') || `<li><small>No results.</small></li>`;
+    }
+    renderList(locations);
+
+    // List click -> select on map
+    listEl.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button[data-id]');
+      if(!btn) return;
+      const id = +btn.dataset.id;
+      const loc = locations.find(x=>x.id===id);
+      if(loc) selectLocation(loc, true);
+    });
+
+    // Search filter
+    document.getElementById('search').addEventListener('input', (e)=>{
+      const q = e.target.value.trim().toLowerCase();
+      const filtered = locations.filter(l =>
+        l.name.toLowerCase().includes(q) ||
+        l.city.toLowerCase().includes(q) ||
+        l.addr.toLowerCase().includes(q)
+      );
+      renderList(filtered);
+    });
+
+    // Select helper
+    const directionsLink = document.getElementById('directionsLink');
+    function selectLocation(loc, openPopup=false){
+      selected = loc;
+      map.setView([loc.lat, loc.lng], 12, { animate:true });
+      if(openPopup) markers[loc.id].openPopup();
+      directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(loc.lat+','+loc.lng)}&destination_place_id=&travelmode=driving`;
+      directionsLink.textContent = `Directions to ${loc.city}`;
+    }
+
+    // Geolocation button
+    document.getElementById('locateBtn').addEventListener('click', ()=>{
+      if(!navigator.geolocation){
+        alert('Geolocation is not supported on this browser.');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(pos=>{
+        const { latitude, longitude } = pos.coords;
+        const user = L.circleMarker([latitude, longitude], {radius:8, color:'#25632e'}).addTo(map);
+        user.bindPopup('You are here').openPopup();
+        map.setView([latitude, longitude], 12, { animate:true });
+
+        // Find nearest simple (by squared distance)
+        let best = null, bestD = Infinity;
+        locations.forEach(l=>{
+          const d = (l.lat-latitude)**2 + (l.lng-longitude)**2;
+          if(d < bestD){bestD = d; best = l;}
+        });
+        if(best){
+          selectLocation(best);
+          markers[best.id].openPopup();
+        }
+      }, err=>{
+        alert('Unable to get your location.');
+        console.error(err);
+      }, {enableHighAccuracy:true, timeout:8000, maximumAge:0});
+    });
+
+    // Preselect first
+    selectLocation(locations[0]);
+  </script>
+</body>
+</html>
